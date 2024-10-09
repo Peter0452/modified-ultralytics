@@ -22,6 +22,7 @@ __all__ = (
     "Concat",
     "RepConv",
     "mn_conv",
+    "Add",
 )
 
 
