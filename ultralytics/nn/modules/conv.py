@@ -21,6 +21,7 @@ __all__ = (
     "CBAM",
     "Concat",
     "RepConv",
+    "mn_conv",
 )
 
 
@@ -330,3 +331,28 @@ class Concat(nn.Module):
     def forward(self, x):
         """Forward pass for the YOLOv8 mask Proto module."""
         return torch.cat(x, self.d)
+
+def activation_function(act="RE"):
+    res = nn.Hardswish()
+    if act == "RE":
+        res = nn.ReLU6(inplace=True)
+    elif act == "GE":
+        res = nn.GELU()
+    elif act == "SI":
+        res = nn.SiLU()
+    elif act == "EL":
+        res = nn.ELU()
+    else:
+        res = nn.Hardswish()
+    return res
+
+class mn_conv(nn.Module):
+    def __init__(self, c1, c2, k=1, s=1, act="RE", p=None, g=1, d=1):
+        super().__init__()
+        padding = 0 if k==s else autopad(k,p,d)
+        self.c = nn.Conv2d(c1, c2, k, s, padding, groups=g)
+        self.bn = nn.BatchNorm2d(c2)
+        self.act = activation_function(act)#nn.ReLU6(inplace=True) if act=="RE" else nn.Hardswish()
+    
+    def forward(self, x):
+        return self.act(self.bn(self.c(x)))
