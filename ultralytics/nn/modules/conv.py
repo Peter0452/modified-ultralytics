@@ -355,4 +355,4 @@ class mn_conv(nn.Module):
         self.act = activation_function(act)#nn.ReLU6(inplace=True) if act=="RE" else nn.Hardswish()
     
     def forward(self, x):
-        return self.act(self.bn(self.c(x)))
+        return self.act(self.bn(self.c(x))) 
