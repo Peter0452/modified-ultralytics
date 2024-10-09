@@ -57,7 +57,7 @@ from .block import (
     ResNetLayer,
     SCDown,
     InvertedBottleneck,
-    MobileNetV3_BLOCK,
+    MobileNetV3_BLOCK, 
 )
 from .conv import (
     CBAM,
@@ -73,7 +73,7 @@ from .conv import (
     LightConv,
     RepConv,
     SpatialAttention,
-    mn_conv,
+    mn_conv, 
 )
 from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect
 from .transformer import (
