@@ -34,20 +34,21 @@ class Detect(nn.Module):
         super().__init__()
         self.nc = nc  # number of classes
         self.nl = len(ch)  # number of detection layers
-        self.reg_max = 16  # DFL channels (ch[0] // 16 to scale 4/8/12/16/20 for n/s/m/l/x)
+        self.reg_max = 6  # 16 - DFL channels (ch[0] // 16 to scale 4/8/12/16/20 for n/s/m/l/x)
         self.no = nc + self.reg_max * 4  # number of outputs per anchor
         self.stride = torch.zeros(self.nl)  # strides computed during build
-        c2, c3 = max((16, ch[0] // 4, self.reg_max * 4)), max(ch[0], min(self.nc, 100))  # channels
+        c2, c3 = max((6, ch[0] // 4, self.reg_max * 4)), max(ch[0], min(self.nc, 100))  # channels
+        print(c2)
         self.cv2 = nn.ModuleList(
             # nn.Sequential(Conv(x, c2, 3), Conv(c2, c2, 3), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch # 
-            nn.Sequential(Conv(x, c2, 2), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch
+            nn.Sequential(Conv(x, c2, 3), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch
         )
         self.cv3 = nn.ModuleList(
             nn.Sequential(
                 # nn.Sequential(DWConv(x, x, 3), Conv(x, c3, 1)),
                 # nn.Sequential(DWConv(c3, c3, 3), Conv(c3, c3, 1)),
-                nn.Sequential(DWConv(x, c3, 2)),
-                nn.Conv2d(c3, self.nc, 1),
+                # nn.Sequential(DWConv(x, c3, 2)),
+                nn.Conv2d(x, self.nc, 1), # nn.Conv2d(c3, self.nc, 1),
             )
             for x in ch
         )
@@ -62,7 +63,11 @@ class Detect(nn.Module):
         if self.end2end:
             return self.forward_end2end(x)
         for i in range(self.nl):
+            #print(x[i].shape)
+            #print(self.cv2[i](x[i]).shape)
+            #print(self.cv3[i](x[i]).shape)
             x[i] = torch.cat((self.cv2[i](x[i]), self.cv3[i](x[i])), 1)
+            # print(x[i].shape)
         if self.training:  # Training path
             return x
         y = self._inference(x)
