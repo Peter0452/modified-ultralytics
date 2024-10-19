@@ -34,14 +34,20 @@ class Detect(nn.Module):
         super().__init__()
         self.nc = nc  # number of classes
         self.nl = len(ch)  # number of detection layers
-        self.reg_max = 6  # 16 - DFL channels (ch[0] // 16 to scale 4/8/12/16/20 for n/s/m/l/x)
+        self.reg_max = 10  # 16 - DFL channels (ch[0] // 16 to scale 4/8/12/16/20 for n/s/m/l/x)
         self.no = nc + self.reg_max * 4  # number of outputs per anchor
         self.stride = torch.zeros(self.nl)  # strides computed during build
         c2, c3 = max((6, ch[0] // 4, self.reg_max * 4)), max(ch[0], min(self.nc, 100))  # channels
         print(c2)
         self.cv2 = nn.ModuleList(
             # nn.Sequential(Conv(x, c2, 3), Conv(c2, c2, 3), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch # 
-            nn.Sequential(Conv(x, c2, 3), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch
+            # nn.Sequential(Conv(x, c2, 3), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch
+            # Depthwise seperable cnn
+            nn.Sequential(
+                DWConv(x, x, 3), Conv(x, c2, 1),
+                DWConv(c2, c2, 3), Conv(c2, c2, 1),
+                nn.Conv2d(c2, 4 * self.reg_max, 1)
+            ) for x in ch
         )
         self.cv3 = nn.ModuleList(
             nn.Sequential(
