@@ -61,6 +61,7 @@ from ultralytics.nn.modules import (
     WorldDetect,
     v10Detect,
     mn_conv,
+    LightConv,
     InvertedBottleneck,
     MobileNetV3_BLOCK,
 )
@@ -1000,6 +1001,7 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             SCDown,
             C2fCIB,
             mn_conv, 
+            LightConv,
             InvertedBottleneck,
             MobileNetV3_BLOCK,
         }:
